@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#007bff">
+    <title>Data Management System</title>
+    <!-- LocalForage CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/localforage/1.10.0/localforage.min.js"></script>
+    <style>
+        /* CSS Variables for theming */
+        :root {
+            --primary-color: #007bff;
+            --primary-hover: #0056b3;
+            --secondary-color: #6c757d;
+            --success-color: #28a745;
+            --danger-color: #dc3545;
+            --warning-color: #ffc107;
+            --info-color: #17a2b8;
+            --light-color: #f8f9fa;
+            --dark-color: #343a40;
+            
+            --text-color: #333;
+            --text-muted: #6c757d;
+            --border-color: #dee2e6;
+            
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+            
+            --space-1: 0.25rem;
+            --space-2: 0.5rem;
+            --space-3: 1rem;
+            --space-4: 1.5rem;
+            --space-5: 3rem;
+            
+            --border-radius: 0.5rem;
+            --border-radius-lg: 1rem;
+            --border-radius-sm: 0.25rem;
+            
+            --transition-speed: 0.3s;
+            --sidebar-width: 280px;
+        }
+
+        /* Reset and base styles */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            font-size: 16px;
+            height: 100%;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 
+                         Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 
+                         'Helvetica Neue', sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background: #f5f5f5;
+            min-height: 100vh;
+            transition: padding-left var(--transition-speed);
+            padding-top: 60px; /* Space for header on mobile */
+        }
+
+        /* Layout for desktop */
+        @media (min-width: 1024px) {
+            body {
+                padding-left: var(--sidebar-width);
+                padding-top: 0; /* Remove header space on desktop */
+            }
+        }
+
+        /* Layout for mobile */
+        @media (max-width: 1023px) {
+            body {
+                padding-left: 0;
+            }
+
+            body.nav-open {
+                overflow: hidden;
+            }
+        }
+
+        /* Main container */
+        .main-container {
+            padding: var(--space-3);
+            min-height: 100vh;
+        }
+
+        /* App Container */
+        .app-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            padding: var(--space-4);
+            border-radius: var(--border-radius-lg);
+            box-shadow: var(--shadow-md);
+            min-height: calc(100vh - 2rem);
+        }
+
+        /* Header Styles */
+        .app-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 60px;
+            background: white;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            align-items: center;
+            padding: 0 var(--space-4);
+            z-index: 40;
+        }
+
+        @media (min-width: 1024px) {
+            .app-header {
+                display: none; /* Hide header on desktop */
+            }
+        }
+
+        .app-title {
+            margin-left: 60px; /* Space for hamburger menu */
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        /* View Controls */
+        .view-controls {
+            display: flex;
+            gap: var(--space-2);
+            margin-bottom: var(--space-4);
+            flex-wrap: wrap;
+        }
+
+        /* Actions Group */
+        .actions-group {
+            display: flex;
+            gap: var(--space-2);
+            margin-bottom: var(--space-4);
+            flex-wrap: wrap;
+        }
+
+        /* Button Styles */
+        button {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 0.9rem;
+            min-width: 100px;
+            transition: all var(--transition-speed);
+            background: var(--primary-color);
+            color: white;
+        }
+
+        button:hover {
+            background: var(--primary-hover);
+        }
+
+        button.active {
+            background: var(--primary-hover);
+        }
+
+        button.secondary {
+            background: var(--secondary-color);
+        }
+
+        button.secondary:hover {
+            background: var(--dark-color);
+        }
+
+        /* Loading State */
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        /* Offline State */
+        body.offline .online-only {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        body.offline .offline-indicator {
+            display: block;
+        }
+
+        .offline-indicator {
+            display: none;
+            position: fixed;
+            bottom: var(--space-3);
+            right: var(--space-3);
+            background: var(--danger-color);
+            color: white;
+            padding: var(--space-2) var(--space-3);
+            border-radius: var(--border-radius);
+            font-size: 0.875rem;
+            box-shadow: var(--shadow-md);
+            z-index: 1000;
+        }
+
+        /* Toast Notifications */
+        .toast-container {
+            position: fixed;
+            bottom: var(--space-3);
+            right: var(--space-3);
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-2);
+            z-index: 1000;
+        }
+
+        .toast {
+            padding: var(--space-2) var(--space-3);
+            border-radius: var(--border-radius);
+            background: white;
+            box-shadow: var(--shadow-md);
+            font-size: 0.875rem;
+            max-width: 300px;
+            animation: slideIn 0.3s ease;
+        }
+
+        .toast.success { border-left: 4px solid var(--success-color); }
+        .toast.error { border-left: 4px solid var(--danger-color); }
+        .toast.info { border-left: 4px solid var(--info-color); }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .main-container {
+                padding: var(--space-2);
+            }
+
+            .app-container {
+                padding: var(--space-3);
+                border-radius: var(--border-radius);
+            }
+
+            .view-controls, 
+            .actions-group {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
+
+            .app-title {
+                font-size: 1rem;
+            }
+        }
+
+        /* Print Styles */
+        @media print {
+            body {
+                padding: 0;
+                background: white;
+            }
+
+            .app-container {
+                box-shadow: none;
+                padding: 0;
+            }
+
+            .no-print {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav-component id="main-nav" app-name="Data Management System"></nav-component>
+
+    <!-- Mobile Header -->
+    <header class="app-header">
+        <h1 id="app-title" class="app-title">Loading...</h1>
+    </header>
+
+ <!-- Main Content -->
+ <div class="main-container">
+    <main class="app-container">
+        <!-- Search and Actions Area -->
+        <div class="controls-area">
+            <div class="search-wrapper">
+                <filter-component id="data-filter"></filter-component>
+            </div>
+
+            <!-- <div class="actions-group no-print">
+                <button onclick="window.app.toggleEditor()">Add New Entry</button>
+                <button onclick="window.app.exportData()" class="online-only">Export Data</button>
+            </div> -->
+        </div>
+
+        <!-- Main Data Display -->
+        <table-component id="data-table"></table-component>
+        <editor-component id="data-editor"></editor-component>
+        <info-card-component id="info-card"></info-card-component>
+    </main>
+</div>
+
+    <!-- Offline Indicator -->
+    <div class="offline-indicator">
+        You are currently offline
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- Initialize LocalForage -->
+    <script>
+        localforage.config({
+            driver: [
+                localforage.INDEXEDDB,
+                localforage.WEBSQL,
+                localforage.LOCALSTORAGE
+            ],
+            name: 'DataManagementApp'
+        });
+    </script>
+    
+    <!-- Application Scripts -->
+    <script type="module" src="./services/UtilsService.js"></script>
+    <script type="module" src="./services/StorageService.js"></script>
+    <script type="module" src="./services/DataContext.js"></script>
+    <script type="module" src="./components/BaseComponent.js"></script>
+    <script type="module" src="./components/NavComponent.js"></script>
+    <script type="module" src="./components/TableComponent.js"></script>
+    <script type="module" src="./components/FilterComponent.js"></script>
+    <script type="module" src="./components/EditorComponent.js"></script>
+    <script type="module" src="./components/InfoCardComponent.js"></script>
+    <script type="module" src="App.js"></script>
+</body>
+</html>

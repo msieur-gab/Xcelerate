@@ -1,0 +1,7 @@
+userId,userName,email,phone,department,role,status,isVerified,skillLevel,joinDate,availability
+U001,John Doe,john@example.com,+1-234-5678901,Engineering,Senior Developer,"active,inactive,pending",true,"expert,intermediate,beginner",2024-01-15,100
+U002,Jane Smith,jane@example.com,9876543210,Marketing,Marketing Manager,"inactive,active,pending",false,"expert,intermediate,beginner",2024-02-01,75
+U003,Bob Johnson,bob@example.com,+44-789-0123456,Sales,Sales Representative,"pending,active,inactive",true,"intermediate,beginner,expert",2024-01-20,50
+U004,Alice Brown,alice@example.com,+1-567-8901234,Engineering,Technical Lead,"active,inactive,pending",true,"expert,intermediate,beginner",2024-03-01,85
+U005,Charlie Wilson,charlie@example.com,+33-678-901234,Marketing,Content Strategist,"inactive,pending,active",false,"intermediate,expert,beginner",2024-02-15,60
+userId1739007958210-7b1q9g9yw,Gabriel baude,baude.gabriel@gmail.com,,design,Lead designer,active,,,,100
