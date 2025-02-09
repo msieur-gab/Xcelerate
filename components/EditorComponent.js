@@ -41,13 +41,26 @@ class EditorComponent extends BaseComponent {
 
     toggle(force) {
         this.isVisible = typeof force === 'boolean' ? force : !this.isVisible;
+        this.setAttribute('visible', this.isVisible);
+    
         const container = this.shadowRoot.querySelector('.editor-container');
         const overlay = this.shadowRoot.querySelector('.overlay');
         
         if (container && overlay) {
-            container.classList.toggle('visible', this.isVisible);
-            overlay.classList.toggle('visible', this.isVisible);
-            document.body.style.overflow = this.isVisible ? 'hidden' : '';
+            if (this.isVisible) {
+                container.classList.add('visible');
+                overlay.classList.add('visible');
+                document.body.style.overflow = 'hidden';
+            } else {
+                container.classList.remove('visible');
+                overlay.classList.remove('visible');
+                
+                overlay.addEventListener('transitionend', () => {
+                    if (!this.isVisible) {
+                        document.body.style.overflow = '';
+                    }
+                }, { once: true });
+            }
         }
     }
 
