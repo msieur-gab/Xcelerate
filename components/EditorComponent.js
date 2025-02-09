@@ -176,7 +176,7 @@ class EditorComponent extends BaseComponent {
         return !hasErrors;
     }
 
-    async handleSubmit(e) {
+   async handleSubmit(e) {
         e.preventDefault();
         const formData = new FormData(e.target);
         const record = Object.fromEntries(formData.entries());
@@ -199,7 +199,7 @@ class EditorComponent extends BaseComponent {
             sourceId: this.sourceId,
             entry: record
         });
-        
+         
         this.toggle(false);
         e.target.reset();
         this.editingRecord = null;
@@ -213,14 +213,26 @@ class EditorComponent extends BaseComponent {
             `;
             return;
         }
-
+    
         const sourceConfig = await this.getSourceConfig(this.sourceId);
         if (!sourceConfig) return;
-
+    
+        const dataContext = await this.getDataContext();
+        const data = await dataContext.getData(this.sourceId);
+    
+        if (data.length === 0) {
+            this.shadowRoot.innerHTML = `
+                <style>${this.styles}</style>
+                <div class="error">No data available</div>
+            `;
+            return;
+        }
+    
+        const fields = Object.keys(data[0]);
         const formFields = await Promise.all(
-            sourceConfig.visibleColumns.map(field => this.createInputField(field))
+            fields.map(field => this.createInputField(field))
         );
-
+    
         this.shadowRoot.innerHTML = `
             <style>${this.styles}</style>
             <div class="overlay ${this.isVisible ? 'visible' : ''}">
