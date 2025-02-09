@@ -310,6 +310,10 @@
 
         <!-- Main Data Display -->
         <table-component id="data-table"></table-component>
+        <div class="actions-group no-print">
+            <button onclick="window.app.toggleEditor()">Add New Entry</button>
+            <!-- <button onclick="window.app.exportData()" class="online-only">Export Data</button> -->
+        </div>
         <editor-component id="data-editor"></editor-component>
         <info-card-component id="info-card"></info-card-component>
     </main>
